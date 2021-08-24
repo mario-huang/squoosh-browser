@@ -1,0 +1,9 @@
+{
+  "name": "@yireen/squoosh-browser",
+  "version": "0.0.1",
+  "description": "An image compression tool run in browser while @squoosh/lib can not.",
+  "main": "index.js",
+  "repository": "git@github.com:myeveryheart/squoosh-browser.git",
+  "author": "Mario <myeveryheart@qq.com>",
+  "license": "MIT"
+}
