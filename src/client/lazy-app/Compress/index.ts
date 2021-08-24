@@ -22,7 +22,7 @@ import ResultCache from './result-cache';
 import { cleanMerge, cleanSet } from '../util/clean-modify';
 import './custom-els/MultiPanel';
 import WorkerBridge from '../worker-bridge';
-import { resize } from '../features/processors/resize/client';
+import { resize } from '../../../features/processors/resize/client';
 import { drawableToImageData } from '../util/canvas';
 
 export type OutputType = EncoderType | 'identity';
@@ -56,12 +56,12 @@ interface Props {
 
 interface State {
     source?: SourceImage;
-    sides?: [Side, Side];
+    sides: [Side, Side];
     /** Source image load */
-    loading?: boolean;
-    preprocessorState?: PreprocessorState;
+    loading: boolean;
+    preprocessorState: PreprocessorState;
     encodedPreprocessorState?: PreprocessorState;
-}
+  }
 
 interface MainJob {
     file: File;
@@ -71,11 +71,6 @@ interface MainJob {
 interface SideJob {
     processorState: ProcessorState;
     encoderState?: EncoderState;
-}
-
-interface LoadingFileInfo {
-    loading: boolean;
-    filename?: string;
 }
 
 async function decodeImage(
