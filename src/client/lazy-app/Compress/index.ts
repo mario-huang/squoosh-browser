@@ -16,7 +16,6 @@ import {
 } from '../feature-meta';
 import ResultCache from './result-cache';
 import { cleanMerge, cleanSet } from '../util/clean-modify';
-import './custom-els/MultiPanel';
 import WorkerBridge from '../worker-bridge';
 import { drawableToImageData } from '../util/canvas';
 

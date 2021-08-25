@@ -82,6 +82,6 @@ const exports1 = {
     return timed('resize', () => resize(...args));
   },
 };
-export type ProcessorWorkerApi = typeof exports;
+export type ProcessorWorkerApi = typeof exports1;
 // 'as any' to work around the way our client code has insight into worker code
 expose(exports1, self as any);
