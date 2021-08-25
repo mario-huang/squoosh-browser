@@ -15,7 +15,7 @@ import wp2Encode from './../features/encoders/wp2/worker/wp2Encode';
 import rotate from './../features/preprocessors/rotate/worker/rotate';
 import quantize from './../features/processors/quantize/worker/quantize';
 import resize from './../features/processors/resize/worker/resize';
-const exports = {
+const exports1 = {
   avifDecode(
     ...args: Parameters<typeof avifDecode>
   ): ReturnType<typeof avifDecode> {
@@ -84,4 +84,4 @@ const exports = {
 };
 export type ProcessorWorkerApi = typeof exports;
 // 'as any' to work around the way our client code has insight into worker code
-expose(exports, self as any);
+expose(exports1, self as any);
