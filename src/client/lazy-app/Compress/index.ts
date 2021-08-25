@@ -22,7 +22,6 @@ import ResultCache from './result-cache';
 import { cleanMerge, cleanSet } from '../util/clean-modify';
 import './custom-els/MultiPanel';
 import WorkerBridge from '../worker-bridge';
-import { resize } from '../../../features/processors/resize/client';
 import { drawableToImageData } from '../util/canvas';
 
 export type OutputType = EncoderType | 'identity';
@@ -130,9 +129,6 @@ async function processImage(
     assertSignal(signal);
     let result = source.preprocessed;
 
-    if (processorState.resize.enabled) {
-        result = await resize(signal, source, processorState.resize, workerBridge);
-    }
     if (processorState.quantize.enabled) {
         result = await workerBridge.quantize(
             signal,
