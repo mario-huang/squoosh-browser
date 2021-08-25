@@ -5,5 +5,24 @@
   "main": "index.js",
   "repository": "git@github.com:myeveryheart/squoosh-browser.git",
   "author": "Mario <myeveryheart@qq.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "demo": "node --loader ts-node/esm src/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "16.7.1",
+    "@typescript-eslint/eslint-plugin": "4.29.3",
+    "@typescript-eslint/parser": "4.29.3",
+    "eslint": "7.32.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-prettier": "3.4.1",
+    "prettier": "2.3.2",
+    "ts-loader": "9.2.5",
+    "ts-node": "10.2.1",
+    "tsconfig-paths": "3.10.1",
+    "typescript": "4.3.5"
+  },
+  "dependencies": {
+    
+  }
 }

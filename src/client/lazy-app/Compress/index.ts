@@ -49,11 +49,6 @@ interface Side {
     loading: boolean;
 }
 
-interface Props {
-    file: File;
-    onBack: () => void;
-}
-
 interface State {
     source?: SourceImage;
     sides: [Side, Side];
@@ -248,7 +243,7 @@ function processorStateEquivalent(a: ProcessorState, b: ProcessorState) {
 
 export default class Compress {
 
-    state: State = {
+    private state: State = {
         source: undefined,
         loading: false,
         preprocessorState: defaultPreprocessorState,
@@ -283,8 +278,8 @@ export default class Compress {
     /** For debouncing calls to updateImage for each side. */
     private updateImageTimeout?: number;
 
-    constructor(props: Props) {
-        this.sourceFile = props.file;
+    constructor(file: File) {
+        this.sourceFile = file;
         this.queueUpdateImage({ immediate: true });
     }
 
@@ -349,7 +344,7 @@ export default class Compress {
         if (immediate) {
             this.updateImage();
         } else {
-            this.updateImageTimeout = setTimeout(() => this.updateImage(), delay);
+            this.updateImageTimeout = setTimeout(() => this.updateImage(), delay, []);
         }
     }
 
@@ -367,14 +362,12 @@ export default class Compress {
      * decides which steps can be skipped, and which can be cached.
      */
     private async updateImage() {
-        const currentState = this.state;
-
         // State of the last completed job, or ongoing job
         const latestMainJobState: Partial<MainJob> = this.activeMainJob || {
-            file: currentState.source && currentState.source.file,
-            preprocessorState: currentState.encodedPreprocessorState,
+            file: this.state.source && this.state.source.file,
+            preprocessorState: this.state.encodedPreprocessorState,
         };
-        const latestSideJobStates: Partial<SideJob>[] = currentState.sides.map(
+        const latestSideJobStates: Partial<SideJob>[] = this.state.sides.map(
             (side, i) =>
                 this.activeSideJobs[i] || {
                     processorState:
@@ -387,9 +380,9 @@ export default class Compress {
         // State for this job
         const mainJobState: MainJob = {
             file: this.sourceFile,
-            preprocessorState: currentState.preprocessorState,
+            preprocessorState: this.state.preprocessorState,
         };
-        const sideJobStates: SideJob[] = currentState.sides.map((side) => ({
+        const sideJobStates: SideJob[] = this.state.sides.map((side) => ({
             // If there isn't an encoder selected, we don't process either
             processorState: side.latestSettings.encoderState
                 ? side.latestSettings.processorState
@@ -492,7 +485,7 @@ export default class Compress {
                 throw err;
             }
         } else {
-            ({ decoded, vectorImage } = currentState.source!);
+            ({ decoded, vectorImage } = this.state.source!);
         }
 
         let source: SourceImage;
@@ -547,7 +540,7 @@ export default class Compress {
                 throw err;
             }
         } else {
-            source = currentState.source!;
+            source = this.state.source!;
         }
 
         // That's the main part of the job done.
@@ -609,11 +602,11 @@ export default class Compress {
                                         processorState: jobState.processorState,
                                     },
                                 };
-                                const sides = cleanSet(currentState.sides, sideIndex, side);
+                                const sides = cleanSet(this.state.sides, sideIndex, side);
                                 this.state.sides = sides;
                              }
                         } else {
-                            processed = currentState.sides[sideIndex].processed!;
+                            processed = this.state.sides[sideIndex].processed!;
                         }
 
                         file = await compressImage(
@@ -655,14 +648,14 @@ export default class Compress {
                             encoderState: jobState.encoderState,
                         },
                     };
-                    const sides = cleanSet(currentState.sides, sideIndex, side);
+                    const sides = cleanSet(this.state.sides, sideIndex, side);
                     this.state.sides = sides;
                 }
 
                 this.activeSideJobs[sideIndex] = undefined;
             } catch (err) {
                 if (err.name === 'AbortError') return;
-                const sides = cleanMerge(currentState.sides, sideIndex, {
+                const sides = cleanMerge(this.state.sides, sideIndex, {
                     loading: false,
                 });
                 this.state.sides = sides;
