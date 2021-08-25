@@ -9,22 +9,16 @@ import {
     ImageMimeTypes,
 } from '../util';
 import {
-    PreprocessorState,
     ProcessorState,
     EncoderState,
     encoderMap,
-    defaultPreprocessorState,
     defaultProcessorState,
-    EncoderType,
-    EncoderOptions,
 } from '../feature-meta';
 import ResultCache from './result-cache';
 import { cleanMerge, cleanSet } from '../util/clean-modify';
 import './custom-els/MultiPanel';
 import WorkerBridge from '../worker-bridge';
 import { drawableToImageData } from '../util/canvas';
-
-export type OutputType = EncoderType | 'identity';
 
 export interface SourceImage {
     file: File;
@@ -53,13 +47,10 @@ interface State {
     sides: [Side, Side];
     /** Source image load */
     loading: boolean;
-    preprocessorState: PreprocessorState;
-    encodedPreprocessorState?: PreprocessorState;
   }
 
 interface MainJob {
     file: File;
-    preprocessorState: PreprocessorState;
 }
 
 interface SideJob {
@@ -98,26 +89,6 @@ async function decodeImage(
         console.log(err);
         throw Error("Couldn't decode image");
     }
-}
-
-async function preprocessImage(
-    signal: AbortSignal,
-    data: ImageData,
-    preprocessorState: PreprocessorState,
-    workerBridge: WorkerBridge,
-): Promise<ImageData> {
-    assertSignal(signal);
-    let processedData = data;
-
-    if (preprocessorState.rotate.rotate !== 0) {
-        processedData = await workerBridge.rotate(
-            signal,
-            processedData,
-            preprocessorState.rotate,
-        );
-    }
-
-    return processedData;
 }
 
 async function processImage(
@@ -242,7 +213,6 @@ export default class Compress {
     private state: State = {
         source: undefined,
         loading: false,
-        preprocessorState: defaultPreprocessorState,
         sides: [
             {
                 latestSettings: {
@@ -279,41 +249,6 @@ export default class Compress {
         this.queueUpdateImage({ immediate: true });
     }
 
-    private onEncoderTypeChange = (index: 0 | 1, newType: OutputType): void => {
-        this.state.sides = cleanSet(
-            this.state.sides,
-            `${index}.latestSettings.encoderState`,
-            newType === 'identity'
-                ? undefined
-                : {
-                    type: newType,
-                    options: encoderMap[newType].meta.defaultOptions,
-                },
-        )
-    };
-
-    private onProcessorOptionsChange = (
-        index: 0 | 1,
-        options: ProcessorState,
-    ): void => {
-        this.state.sides = cleanSet(
-            this.state.sides,
-            `${index}.latestSettings.processorState`,
-            options,
-        )
-    }
-
-    private onEncoderOptionsChange = (
-        index: 0 | 1,
-        options: EncoderOptions,
-    ): void => {
-        this.state.sides = cleanSet(
-            this.state.sides,
-            `${index}.latestSettings.encoderState.options`,
-            options,
-        )
-    };
-
     // 放弃处理
     abort(): void {
         this.mainAbortController.abort();
@@ -340,7 +275,7 @@ export default class Compress {
         if (immediate) {
             this.updateImage();
         } else {
-            this.updateImageTimeout = setTimeout(() => this.updateImage(), delay, []);
+            this.updateImageTimeout = window.setTimeout(() => this.updateImage(), delay);
         }
     }
 
@@ -361,7 +296,6 @@ export default class Compress {
         // State of the last completed job, or ongoing job
         const latestMainJobState: Partial<MainJob> = this.activeMainJob || {
             file: this.state.source && this.state.source.file,
-            preprocessorState: this.state.encodedPreprocessorState,
         };
         const latestSideJobStates: Partial<SideJob>[] = this.state.sides.map(
             (side, i) =>
@@ -376,7 +310,6 @@ export default class Compress {
         // State for this job
         const mainJobState: MainJob = {
             file: this.sourceFile,
-            preprocessorState: this.state.preprocessorState,
         };
         const sideJobStates: SideJob[] = this.state.sides.map((side) => ({
             // If there isn't an encoder selected, we don't process either
@@ -388,13 +321,8 @@ export default class Compress {
 
         // Figure out what needs doing:
         const needsDecoding = latestMainJobState.file != mainJobState.file;
-        const needsPreprocessing =
-            needsDecoding ||
-            latestMainJobState.preprocessorState !== mainJobState.preprocessorState;
         const sideWorksNeeded = latestSideJobStates.map((latestSideJob, i) => {
-            const needsProcessing =
-                needsPreprocessing ||
-                !latestSideJob.processorState ||
+            const needsProcessing = !latestSideJob.processorState ||
                 // If we're going to or from 'original image' we should reprocess
                 !!latestSideJob.encoderState !== !!sideJobStates[i].encoderState ||
                 !processorStateEquivalent(
@@ -413,7 +341,7 @@ export default class Compress {
         let jobNeeded = false;
 
         // Abort running tasks & cycle the controllers
-        if (needsDecoding || needsPreprocessing) {
+        if (needsDecoding) {
             this.mainAbortController.abort();
             this.mainAbortController = new AbortController();
             jobNeeded = true;
@@ -486,58 +414,7 @@ export default class Compress {
 
         let source: SourceImage;
 
-        // Handle preprocessing
-        if (needsPreprocessing) {
-            try {
-                assertSignal(mainSignal);
-                this.state.loading = true;
-
-                const preprocessed = await preprocessImage(
-                    mainSignal,
-                    decoded,
-                    mainJobState.preprocessorState,
-                    // Either worker is good enough here.
-                    this.workerBridges[0],
-                );
-
-                source = {
-                    decoded,
-                    vectorImage,
-                    preprocessed,
-                    file: mainJobState.file,
-                };
-
-                // Update state for process completion, including intermediate render
-                if (!mainSignal.aborted) {
-                    let newState: State = {
-                        ...this.state,
-                        loading: false,
-                        source,
-                        encodedPreprocessorState: mainJobState.preprocessorState,
-                        sides: this.state.sides.map((side) => {
-                            if (side.downloadUrl) URL.revokeObjectURL(side.downloadUrl);
-
-                            const newSide: Side = {
-                                ...side,
-                                // Intermediate render
-                                data: preprocessed,
-                                processed: undefined,
-                                encodedSettings: undefined,
-                            };
-                            return newSide;
-                        }) as [Side, Side],
-                    };
-                    newState = stateForNewSourceData(newState);
-                    this.state = newState;
-                }
-            } catch (err) {
-                if (err.name === 'AbortError') return;
-                this.state.loading = false;
-                throw err;
-            }
-        } else {
-            source = this.state.source!;
-        }
+        source = this.state.source!;
 
         // That's the main part of the job done.
         this.activeMainJob = undefined;

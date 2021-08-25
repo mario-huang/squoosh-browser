@@ -10,10 +10,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { WP2Module } from 'codecs/wp2/enc/wp2_enc';
+import type { WP2Module } from '../../../../codecs/wp2/enc/wp2_enc';
 import type { EncodeOptions } from '../shared/meta';
 
-import { initEmscriptenModule } from 'features/worker-utils';
+import { initEmscriptenModule } from '../../../../features/worker-utils';
 import { threads, simd } from 'wasm-feature-detect';
 
 let emscriptenModule: Promise<WP2Module>;
@@ -21,13 +21,13 @@ let emscriptenModule: Promise<WP2Module>;
 async function init() {
   if (await threads()) {
     if (await simd()) {
-      const wp2Encoder = await import('codecs/wp2/enc/wp2_enc_mt_simd');
+      const wp2Encoder = await import('../../../../codecs/wp2/enc/wp2_enc_mt_simd');
       return initEmscriptenModule(wp2Encoder.default);
     }
-    const wp2Encoder = await import('codecs/wp2/enc/wp2_enc_mt');
+    const wp2Encoder = await import('../../../../codecs/wp2/enc/wp2_enc_mt');
     return initEmscriptenModule(wp2Encoder.default);
   }
-  const wp2Encoder = await import('codecs/wp2/enc/wp2_enc');
+  const wp2Encoder = await import('../../../../codecs/wp2/enc/wp2_enc');
   return initEmscriptenModule(wp2Encoder.default);
 }
 

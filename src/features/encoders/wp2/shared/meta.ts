@@ -10,8 +10,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { EncodeOptions } from 'codecs/wp2/enc/wp2_enc';
-import { UVMode, Csp } from 'codecs/wp2/enc/wp2_enc';
+import type { EncodeOptions } from '../../../../codecs/wp2/enc/wp2_enc';
+import { UVMode, Csp } from '../../../../codecs/wp2/enc/wp2_enc';
 
 export { EncodeOptions, UVMode, Csp };
 

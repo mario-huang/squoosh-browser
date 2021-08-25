@@ -67,10 +67,3 @@ export const defaultProcessorState: ProcessorState = {
   quantize: { enabled: false, ...quantizeProcessorMeta.defaultOptions },
   resize: { enabled: false, ...resizeProcessorMeta.defaultOptions },
 }
-import * as rotatePreprocessorMeta from '../../../features/preprocessors/rotate/shared/meta';
-export interface PreprocessorState {
-  rotate: rotatePreprocessorMeta.Options,
-}
-export const defaultPreprocessorState: PreprocessorState = {
-  rotate: rotatePreprocessorMeta.defaultOptions,
-};

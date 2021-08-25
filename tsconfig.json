@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
+    "downlevelIteration": true,
     "module": "CommonJS",
     "declaration": true,
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2017",
+    "target": "ESNext",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
-    "rootDir": "./",
     "incremental": true
   },
 }

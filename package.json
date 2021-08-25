@@ -7,7 +7,11 @@
   "author": "Mario <myeveryheart@qq.com>",
   "license": "MIT",
   "scripts": {
-    "demo": "node --loader ts-node/esm src/index.ts"
+    "build": "tsc"
+  },
+  "dependencies": {
+    "comlink": "4.3.1",
+    "wasm-feature-detect": "1.2.11"
   },
   "devDependencies": {
     "@types/node": "16.7.1",
@@ -21,8 +25,5 @@
     "ts-node": "10.2.1",
     "tsconfig-paths": "3.10.1",
     "typescript": "4.3.5"
-  },
-  "dependencies": {
-    
   }
 }

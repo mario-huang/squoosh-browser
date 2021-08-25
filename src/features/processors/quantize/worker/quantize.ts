@@ -10,8 +10,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import imagequant, { QuantizerModule } from 'codecs/imagequant/imagequant';
-import { initEmscriptenModule } from 'features/worker-utils';
+import imagequant, { QuantizerModule } from '../../../../codecs/imagequant/imagequant';
+import { initEmscriptenModule } from '../../../../features/worker-utils';
 import { Options } from '../shared/meta';
 
 let emscriptenModule: Promise<QuantizerModule>;

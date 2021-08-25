@@ -10,14 +10,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { AVIFModule } from 'codecs/avif/dec/avif_dec';
-import { initEmscriptenModule, blobToArrayBuffer } from 'features/worker-utils';
+import type { AVIFModule } from '../../../../codecs/avif/dec/avif_dec';
+import { initEmscriptenModule, blobToArrayBuffer } from '../../../../features/worker-utils';
 
 let emscriptenModule: Promise<AVIFModule>;
 
 export default async function decode(blob: Blob): Promise<ImageData> {
   if (!emscriptenModule) {
-    const decoder = await import('codecs/avif/dec/avif_dec');
+    const decoder = await import('../../../../codecs/avif/dec/avif_dec');
     emscriptenModule = initEmscriptenModule(decoder.default);
   }
 

@@ -58,7 +58,7 @@ for (const methodName of methodNames) {
           signal.removeEventListener('abort', onAbort);
 
           // Start a timer to clear up the worker.
-          this._workerTimeout = setTimeout(() => {
+          this._workerTimeout = window.setTimeout(() => {
             this._terminateWorker();
           }, workerTimeout);
         });

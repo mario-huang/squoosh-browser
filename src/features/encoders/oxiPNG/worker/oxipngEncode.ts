@@ -15,7 +15,7 @@ import { threads } from 'wasm-feature-detect';
 
 async function initMT() {
   const { default: init, initThreadPool, optimise } = await import(
-    'codecs/oxipng/pkg-parallel/squoosh_oxipng'
+    '../../../../codecs/oxipng/pkg-parallel/squoosh_oxipng'
   );
   await init();
   await initThreadPool(navigator.hardwareConcurrency);
@@ -24,7 +24,7 @@ async function initMT() {
 
 async function initST() {
   const { default: init, optimise } = await import(
-    'codecs/oxipng/pkg/squoosh_oxipng'
+    '../../../../codecs/oxipng/pkg/squoosh_oxipng'
   );
   await init();
   return optimise;
