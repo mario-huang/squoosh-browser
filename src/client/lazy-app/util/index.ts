@@ -132,18 +132,15 @@ export async function blobToImg(blob: Blob): Promise<HTMLImageElement> {
 }
 
 export async function builtinDecode(
-  signal: AbortSignal,
   blob: Blob,
   mimeType: string,
 ): Promise<ImageData> {
   // If WebCodecs are supported, use that.
   if (await WebCodecs.isTypeSupported(mimeType)) {
-    assertSignal(signal);
     try {
-      return await abortable(signal, WebCodecs.decode(blob, mimeType));
+      return await WebCodecs.decode(blob, mimeType);
     } catch (e) {}
   }
-  assertSignal(signal);
 
   // Prefer createImageBitmap as it's the off-thread option for Firefox.
   const drawable = await abortable<HTMLImageElement | ImageBitmap>(

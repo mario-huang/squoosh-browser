@@ -4,17 +4,18 @@ import {
     builtinDecode,
     sniffMimeType,
     canDecodeImageType,
-    abortable,
-    assertSignal,
     ImageMimeTypes,
 } from '../util';
 import {
-    ProcessorState,
-    EncoderState,
-    encoderMap,
-    defaultProcessorState,
+    PreprocessorState,
+  ProcessorState,
+  EncoderState,
+  encoderMap,
+  defaultPreprocessorState,
+  defaultProcessorState,
+  EncoderType,
+  EncoderOptions,
 } from '../feature-meta';
-import ResultCache from './result-cache';
 import { cleanMerge, cleanSet } from '../util/clean-modify';
 import WorkerBridge from '../worker-bridge';
 import { drawableToImageData } from '../util/canvas';
@@ -26,82 +27,59 @@ export interface SourceImage {
     vectorImage?: HTMLImageElement;
 }
 
-interface SideSettings {
+interface Setting {
     processorState: ProcessorState;
     encoderState?: EncoderState;
 }
-
-interface Side {
-    processed?: ImageData;
-    file?: File;
-    downloadUrl?: string;
-    data?: ImageData;
-    latestSettings: SideSettings;
-    encodedSettings?: SideSettings;
-    loading: boolean;
-}
-
-interface State {
-    source?: SourceImage;
-    sides: [Side, Side];
-    /** Source image load */
-    loading: boolean;
-  }
 
 interface MainJob {
     file: File;
-}
-
-interface SideJob {
+    preprocessorState: PreprocessorState;
+  }
+  
+  interface SideJob {
     processorState: ProcessorState;
     encoderState?: EncoderState;
-}
+  }
 
+// 解码
 async function decodeImage(
-    signal: AbortSignal,
     blob: Blob,
     workerBridge: WorkerBridge,
 ): Promise<ImageData> {
-    assertSignal(signal);
-    const mimeType = await abortable(signal, sniffMimeType(blob));
-    const canDecode = await abortable(signal, canDecodeImageType(mimeType));
-
-    try {
-        if (!canDecode) {
-            if (mimeType === 'image/avif') {
-                return await workerBridge.avifDecode(signal, blob);
-            }
-            if (mimeType === 'image/webp') {
-                return await workerBridge.webpDecode(signal, blob);
-            }
-            if (mimeType === 'image/jxl') {
-                return await workerBridge.jxlDecode(signal, blob);
-            }
-            if (mimeType === 'image/webp2') {
-                return await workerBridge.wp2Decode(signal, blob);
-            }
+    const mimeType = await sniffMimeType(blob);
+    const canDecode = await canDecodeImageType(mimeType);
+    if (!canDecode) {
+        // 用外置解码
+        if (mimeType === 'image/avif') {
+            return await workerBridge.avifDecode(blob);
         }
-        // Otherwise fall through and try built-in decoding for a laugh.
-        return await builtinDecode(signal, blob, mimeType);
-    } catch (err) {
-        if (err.name === 'AbortError') throw err;
-        console.log(err);
-        throw Error("Couldn't decode image");
+        if (mimeType === 'image/webp') {
+            return await workerBridge.webpDecode(blob);
+        }
+        if (mimeType === 'image/jxl') {
+            return await workerBridge.jxlDecode(blob);
+        }
+        if (mimeType === 'image/webp2') {
+            return await workerBridge.wp2Decode(blob);
+        }
+
     }
+    // Otherwise fall through and try built-in decoding for a laugh.
+    // 用内置解码
+    return await builtinDecode(blob, mimeType);
 }
 
+// 加工
 async function processImage(
-    signal: AbortSignal,
     source: SourceImage,
     processorState: ProcessorState,
     workerBridge: WorkerBridge,
 ): Promise<ImageData> {
-    assertSignal(signal);
     let result = source.preprocessed;
 
     if (processorState.quantize.enabled) {
         result = await workerBridge.quantize(
-            signal,
             result,
             processorState.quantize,
         );
@@ -109,18 +87,15 @@ async function processImage(
     return result;
 }
 
+// 编码
 async function compressImage(
-    signal: AbortSignal,
     image: ImageData,
     encodeData: EncoderState,
     sourceFilename: string,
     workerBridge: WorkerBridge,
 ): Promise<File> {
-    assertSignal(signal);
-
     const encoder = encoderMap[encodeData.type];
     const compressedData = await encoder.encode(
-        signal,
         workerBridge,
         image,
         // The type of encodeData.options is enforced via the previous line
@@ -137,36 +112,15 @@ async function compressImage(
     );
 }
 
-function stateForNewSourceData(state: State): State {
-    let newState = { ...state };
-
-    for (const i of [0, 1]) {
-        // Ditch previous encodings
-        const downloadUrl = state.sides[i].downloadUrl;
-        if (downloadUrl) URL.revokeObjectURL(downloadUrl);
-
-        newState = cleanMerge(state, `sides.${i}`, {
-            preprocessed: undefined,
-            file: undefined,
-            downloadUrl: undefined,
-            data: undefined,
-            encodedSettings: undefined,
-        });
-    }
-
-    return newState;
-}
-
+// 特殊处理SVG
 async function processSvg(
-    signal: AbortSignal,
     blob: Blob,
 ): Promise<HTMLImageElement> {
-    assertSignal(signal);
     // Firefox throws if you try to draw an SVG to canvas that doesn't have width/height.
     // In Chrome it loads, but drawImage behaves weirdly.
     // This function sets width/height if it isn't already set.
     const parser = new DOMParser();
-    const text = await abortable(signal, blobToText(blob));
+    const text = await blobToText(blob);
     const document = parser.parseFromString(text, 'image/svg+xml');
     const svg = document.documentElement!;
 
@@ -183,10 +137,7 @@ async function processSvg(
 
     const serializer = new XMLSerializer();
     const newSource = serializer.serializeToString(document);
-    return abortable(
-        signal,
-        blobToImg(new Blob([newSource], { type: 'image/svg+xml' })),
-    );
+    return blobToImg(new Blob([newSource], { type: 'image/svg+xml' }));
 }
 
 /**
@@ -209,80 +160,22 @@ function processorStateEquivalent(a: ProcessorState, b: ProcessorState) {
 
 export default class Compress {
 
-    private state: State = {
-        source: undefined,
-        loading: false,
-        sides: [
-            {
-                latestSettings: {
-                    processorState: defaultProcessorState,
-                    encoderState: undefined,
-                },
-                loading: false,
-            },
-            {
-                latestSettings: {
-                    processorState: defaultProcessorState,
-                    encoderState: {
-                        type: 'mozJPEG',
-                        options: encoderMap.mozJPEG.meta.defaultOptions,
-                    },
-                },
-                loading: false,
-            },
-        ],
-    };
+    private readonly workerBridge = new WorkerBridge();
+    // 需要处理的文件
+    private file: File;
+    // ？？
+    private processed?: ImageData;
+    // 编码设置
+    private setting: Setting = { "encoderState": undefined, "processorState": defaultProcessorState };
 
-    private readonly encodeCache = new ResultCache();
-    // One for each side
-    private readonly workerBridges = [new WorkerBridge(), new WorkerBridge()];
-    /** Abort controller for actions that impact both sites, like source image decoding and preprocessing */
-    private mainAbortController = new AbortController();
-    // And again one for each side
-    private sideAbortControllers = [new AbortController(), new AbortController()];
-    /** For debouncing calls to updateImage for each side. */
-    private updateImageTimeout?: number;
-
-    constructor(file: File) {
-        this.sourceFile = file;
-        this.queueUpdateImage({ immediate: true });
-    }
-
-    // 放弃处理
-    abort(): void {
-        this.mainAbortController.abort();
-        for (const controller of this.sideAbortControllers) {
-            controller.abort();
-        }
+    constructor(file: File, setting?: Setting) {
+        this.file = file;
     }
 
     // 处理
-    process(): void {
-        this.queueUpdateImage();
+    async process(): Promise<void> {
+        return await this.updateImage();
     }
-
-    /**
-     * Debounce the heavy lifting of updateImage.
-     * Otherwise, the thrashing causes jank, and sometimes crashes iOS Safari.
-     */
-    private queueUpdateImage({ immediate }: { immediate?: boolean } = {}): void {
-        // Call updateImage after this delay, unless queueUpdateImage is called
-        // again, in which case the timeout is reset.
-        const delay = 100;
-
-        clearTimeout(this.updateImageTimeout);
-        if (immediate) {
-            this.updateImage();
-        } else {
-            this.updateImageTimeout = window.setTimeout(() => this.updateImage(), delay);
-        }
-    }
-
-    private sourceFile: File;
-    /** The in-progress job for decoding and preprocessing */
-    private activeMainJob?: MainJob;
-    /** The in-progress job for each side (processing and encoding) */
-    private activeSideJobs: [SideJob?, SideJob?] = [undefined, undefined];
 
     /**
      * Perform image processing.
@@ -292,247 +185,39 @@ export default class Compress {
      * decides which steps can be skipped, and which can be cached.
      */
     private async updateImage() {
-        // State of the last completed job, or ongoing job
-        const latestMainJobState: Partial<MainJob> = this.activeMainJob || {
-            file: this.state.source && this.state.source.file,
-        };
-        const latestSideJobStates: Partial<SideJob>[] = this.state.sides.map(
-            (side, i) =>
-                this.activeSideJobs[i] || {
-                    processorState:
-                        side.encodedSettings && side.encodedSettings.processorState,
-                    encoderState:
-                        side.encodedSettings && side.encodedSettings.encoderState,
-                },
-        );
-
-        // State for this job
-        const mainJobState: MainJob = {
-            file: this.sourceFile,
-        };
-        const sideJobStates: SideJob[] = this.state.sides.map((side) => ({
-            // If there isn't an encoder selected, we don't process either
-            processorState: side.latestSettings.encoderState
-                ? side.latestSettings.processorState
-                : defaultProcessorState,
-            encoderState: side.latestSettings.encoderState,
-        }));
-
-        // Figure out what needs doing:
-        const needsDecoding = latestMainJobState.file != mainJobState.file;
-        const sideWorksNeeded = latestSideJobStates.map((latestSideJob, i) => {
-            const needsProcessing = !latestSideJob.processorState ||
-                // If we're going to or from 'original image' we should reprocess
-                !!latestSideJob.encoderState !== !!sideJobStates[i].encoderState ||
-                !processorStateEquivalent(
-                    latestSideJob.processorState,
-                    sideJobStates[i].processorState,
-                );
-
-            return {
-                processing: needsProcessing,
-                encoding:
-                    needsProcessing ||
-                    latestSideJob.encoderState !== sideJobStates[i].encoderState,
-            };
-        });
-
-        let jobNeeded = false;
-
-        // Abort running tasks & cycle the controllers
-        if (needsDecoding) {
-            this.mainAbortController.abort();
-            this.mainAbortController = new AbortController();
-            jobNeeded = true;
-            this.activeMainJob = mainJobState;
-        }
-        for (const [i, sideWorkNeeded] of sideWorksNeeded.entries()) {
-            if (sideWorkNeeded.processing || sideWorkNeeded.encoding) {
-                this.sideAbortControllers[i].abort();
-                this.sideAbortControllers[i] = new AbortController();
-                jobNeeded = true;
-                this.activeSideJobs[i] = sideJobStates[i];
-            }
-        }
-
-        if (!jobNeeded) return;
-
-        const mainSignal = this.mainAbortController.signal;
-        const sideSignals = this.sideAbortControllers.map((ac) => ac.signal);
-
         let decoded: ImageData;
         let vectorImage: HTMLImageElement | undefined;
 
-        // Handle decoding
-        if (needsDecoding) {
-            try {
-                assertSignal(mainSignal);
-                this.state.source = undefined;
-                this.state.loading = true;
-
-                // Special-case SVG. We need to avoid createImageBitmap because of
-                // https://bugs.chromium.org/p/chromium/issues/detail?id=606319.
-                // Also, we cache the HTMLImageElement so we can perform vector resizing later.
-                if (mainJobState.file.type.startsWith('image/svg+xml')) {
-                    vectorImage = await processSvg(mainSignal, mainJobState.file);
-                    decoded = drawableToImageData(vectorImage);
-                } else {
-                    decoded = await decodeImage(
-                        mainSignal,
-                        mainJobState.file,
-                        // Either worker is good enough here.
-                        this.workerBridges[0],
-                    );
-                }
-
-                // Set default resize values
-                if (!mainSignal.aborted) {
-                    const sides = this.state.sides.map((side) => {
-                        const resizeState: Partial<ProcessorState['resize']> = {
-                            width: decoded.width,
-                            height: decoded.height,
-                            method: vectorImage ? 'vector' : 'lanczos3',
-                            // Disable resizing, to make it clearer to the user that something changed here
-                            enabled: false,
-                        };
-                        return cleanMerge(
-                            side,
-                            'latestSettings.processorState.resize',
-                            resizeState,
-                        );
-                    }) as [Side, Side];
-                    this.state.sides = sides;
-                }
-            } catch (err) {
-                if (err.name === 'AbortError') return;
-                throw err;
-            }
+        // 解码
+        if (this.file.type.startsWith('image/svg+xml')) {
+            vectorImage = await processSvg(this.file);
+            decoded = drawableToImageData(vectorImage);
         } else {
-            ({ decoded, vectorImage } = this.state.source!);
+            decoded = await decodeImage(this.file, this.workerBridge);
         }
 
-        let source: SourceImage;
+        // 预处理
+        const preprocessed = await preprocessImage(
+            decoded,
+            mainJobState.preprocessorState,
+            // Either worker is good enough here.
+            this.workerBridges[0],
+          );
 
-        source = this.state.source!;
+        // 加工
+        // If there's no encoder state, this is "original image", which also
+        // doesn't allow processing.
+        const file = this.file;
+        const source: SourceImage = {file,decoded,vectorImage};
+        processed = await processImage();
 
-        // That's the main part of the job done.
-        this.activeMainJob = undefined;
 
-        // Allow side jobs to happen in parallel
-        sideWorksNeeded.forEach(async (sideWorkNeeded, sideIndex) => {
-            try {
-                // If processing is true, encoding is always true.
-                if (!sideWorkNeeded.encoding) return;
-
-                const signal = sideSignals[sideIndex];
-                const jobState = sideJobStates[sideIndex];
-                const workerBridge = this.workerBridges[sideIndex];
-                let file: File;
-                let data: ImageData;
-                let processed: ImageData | undefined = undefined;
-
-                // If there's no encoder state, this is "original image", which also
-                // doesn't allow processing.
-                if (!jobState.encoderState) {
-                    file = source.file;
-                    data = source.preprocessed;
-                } else {
-                    const cacheResult = this.encodeCache.match(
-                        source.preprocessed,
-                        jobState.processorState,
-                        jobState.encoderState,
-                    );
-
-                    if (cacheResult) {
-                        ({ file, processed, data } = cacheResult);
-                    } else {
-                        // Set loading state for this side
-                        if (!signal.aborted) {
-                            const sides = cleanMerge(this.state.sides, sideIndex, {
-                                loading: true,
-                            });
-                            this.state.sides = sides;
-                        }
-                        if (sideWorkNeeded.processing) {
-                            processed = await processImage(
-                                signal,
-                                source,
-                                jobState.processorState,
-                                workerBridge,
-                            );
-
-                            // Update state for process completion, including intermediate render
-                            if (!signal.aborted) {
-                                const currentSide = this.state.sides[sideIndex];
-                                const side: Side = {
-                                    ...currentSide,
-                                    processed,
-                                    // Intermediate render
-                                    data: processed,
-                                    encodedSettings: {
-                                        ...currentSide.encodedSettings,
-                                        processorState: jobState.processorState,
-                                    },
-                                };
-                                const sides = cleanSet(this.state.sides, sideIndex, side);
-                                this.state.sides = sides;
-                             }
-                        } else {
-                            processed = this.state.sides[sideIndex].processed!;
-                        }
-
-                        file = await compressImage(
-                            signal,
-                            processed,
-                            jobState.encoderState,
-                            source.file.name,
-                            workerBridge,
-                        );
-                        data = await decodeImage(signal, file, workerBridge);
-
-                        this.encodeCache.add({
-                            data,
-                            processed,
-                            file,
-                            preprocessed: source.preprocessed,
-                            encoderState: jobState.encoderState,
-                            processorState: jobState.processorState,
-                        });
-                    }
-                }
-
-                if (!signal.aborted) {
-                    const currentSide = this.state.sides[sideIndex];
-
-                    if (currentSide.downloadUrl) {
-                        URL.revokeObjectURL(currentSide.downloadUrl);
-                    }
-
-                    const side: Side = {
-                        ...currentSide,
-                        data,
-                        file,
-                        downloadUrl: URL.createObjectURL(file),
-                        loading: false,
-                        processed,
-                        encodedSettings: {
-                            processorState: jobState.processorState,
-                            encoderState: jobState.encoderState,
-                        },
-                    };
-                    const sides = cleanSet(this.state.sides, sideIndex, side);
-                    this.state.sides = sides;
-                }
-
-                this.activeSideJobs[sideIndex] = undefined;
-            } catch (err) {
-                if (err.name === 'AbortError') return;
-                const sides = cleanMerge(this.state.sides, sideIndex, {
-                    loading: false,
-                });
-                this.state.sides = sides;
-                throw err;
-            }
-        });
+        file = await compressImage(
+            processed,
+            jobState.encoderState,
+            source.file.name,
+            workerBridge,
+        );
+        data = await decodeImage(signal, file, workerBridge);
     }
 }

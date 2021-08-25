@@ -4,11 +4,10 @@ import type WorkerBridge from '../../../../client/lazy-app/worker-bridge';
 import { preventDefault, shallowEqual } from '../../../../client/lazy-app/util';
 
 export const encode = (
-  signal: AbortSignal,
   workerBridge: WorkerBridge,
   imageData: ImageData,
   options: EncodeOptions,
-) => workerBridge.wp2Encode(signal, imageData, options);
+) => workerBridge.wp2Encode(imageData, options);
 
 interface Props {
   options: EncodeOptions;

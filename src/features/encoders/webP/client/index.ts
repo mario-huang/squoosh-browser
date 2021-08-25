@@ -7,11 +7,10 @@ import {
 } from '../../../../client/lazy-app/util';
 
 export const encode = (
-  signal: AbortSignal,
   workerBridge: WorkerBridge,
   imageData: ImageData,
   options: EncodeOptions,
-) => workerBridge.webpEncode(signal, imageData, options);
+) => workerBridge.webpEncode(imageData, options);
 
 const enum WebPImageHint {
   WEBP_HINT_DEFAULT, // default preset.

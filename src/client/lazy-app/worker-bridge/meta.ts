@@ -30,55 +30,42 @@ export const methodNames = [
 ] as const;
 export interface BridgeMethods {
   avifDecode(
-    signal: AbortSignal,
     ...args: Parameters<typeof avifDecode>
   ): Promise<ReturnType<typeof avifDecode>>;
   jxlDecode(
-    signal: AbortSignal,
     ...args: Parameters<typeof jxlDecode>
   ): Promise<ReturnType<typeof jxlDecode>>;
   webpDecode(
-    signal: AbortSignal,
     ...args: Parameters<typeof webpDecode>
   ): Promise<ReturnType<typeof webpDecode>>;
   wp2Decode(
-    signal: AbortSignal,
     ...args: Parameters<typeof wp2Decode>
   ): Promise<ReturnType<typeof wp2Decode>>;
   avifEncode(
-    signal: AbortSignal,
     ...args: Parameters<typeof avifEncode>
   ): Promise<ReturnType<typeof avifEncode>>;
   jxlEncode(
-    signal: AbortSignal,
     ...args: Parameters<typeof jxlEncode>
   ): Promise<ReturnType<typeof jxlEncode>>;
   mozjpegEncode(
-    signal: AbortSignal,
     ...args: Parameters<typeof mozjpegEncode>
   ): Promise<ReturnType<typeof mozjpegEncode>>;
   oxipngEncode(
-    signal: AbortSignal,
     ...args: Parameters<typeof oxipngEncode>
   ): Promise<ReturnType<typeof oxipngEncode>>;
   webpEncode(
-    signal: AbortSignal,
     ...args: Parameters<typeof webpEncode>
   ): Promise<ReturnType<typeof webpEncode>>;
   wp2Encode(
-    signal: AbortSignal,
     ...args: Parameters<typeof wp2Encode>
   ): Promise<ReturnType<typeof wp2Encode>>;
   rotate(
-    signal: AbortSignal,
     ...args: Parameters<typeof rotate>
   ): Promise<ReturnType<typeof rotate>>;
   quantize(
-    signal: AbortSignal,
     ...args: Parameters<typeof quantize>
   ): Promise<ReturnType<typeof quantize>>;
   resize(
-    signal: AbortSignal,
     ...args: Parameters<typeof resize>
   ): Promise<ReturnType<typeof resize>>;
 }

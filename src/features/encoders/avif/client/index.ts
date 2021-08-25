@@ -4,11 +4,10 @@ import { preventDefault, shallowEqual } from '../../../../client/lazy-app/util';
 
 
 export const encode = (
-  signal: AbortSignal,
   workerBridge: WorkerBridge,
   imageData: ImageData,
   options: EncodeOptions,
-) => workerBridge.avifEncode(signal, imageData, options);
+) => workerBridge.avifEncode(imageData, options);
 
 interface Props {
   options: EncodeOptions;

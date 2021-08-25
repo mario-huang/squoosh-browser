@@ -4,7 +4,6 @@ import { EncodeOptions, mimeType } from '../shared/meta';
 
 export const featureTest = () => canvasEncodeTest(mimeType);
 export const encode = (
-  signal: AbortSignal,
   workerBridge: WorkerBridge,
   imageData: ImageData,
   options: EncodeOptions,

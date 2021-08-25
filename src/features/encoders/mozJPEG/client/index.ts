@@ -7,12 +7,11 @@ import {
 } from '../../../../client/lazy-app/util';
 
 export function encode(
-  signal: AbortSignal,
   workerBridge: WorkerBridge,
   imageData: ImageData,
   options: EncodeOptions,
 ) {
-  return workerBridge.mozjpegEncode(signal, imageData, options);
+  return workerBridge.mozjpegEncode(imageData, options);
 }
 
 interface Props {

@@ -9,7 +9,6 @@ import type WorkerBridge from '../../../../client/lazy-app/worker-bridge';
 import { inputFieldValueAsNumber, preventDefault } from '../../../../client/lazy-app/util';
 
 export async function encode(
-  signal: AbortSignal,
   workerBridge: WorkerBridge,
   imageData: ImageData,
   options: EncodeOptions,
