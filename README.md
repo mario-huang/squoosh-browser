@@ -13,16 +13,40 @@ It can process almost all image formats, such as "pdf", "gif", "png", "jpeg", "b
 yarn add @yireen/squoosh-browser
 ```
 
-# config webpack
+If you use webpack4, you also need
+```
+yarn add file-loader --dev
+```
+
+# config
+For webpack5
 ```js
+// webpack.config.js
 module: {
-    rules: [
-      {
-        test: /\.wasm/,
-        type: 'asset/resource'
-      }
-    ]
-  },
+  rules: [
+    {
+      test: /\.wasm/,
+      type: 'asset/resource'
+    }
+  ]
+}
+```
+
+For webpack4
+```js
+// webpack.config.js
+module: {
+  rules: [
+    {
+      test: /\.wasm/,
+      use: [
+        {
+          loader: 'file-loader'
+        }
+      ]
+    }
+  ]
+}
 ```
 
 # usage

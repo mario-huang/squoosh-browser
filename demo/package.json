@@ -7,7 +7,7 @@
     "start": "webpack serve --open"
   },
   "dependencies": {
-    "@yireen/squoosh-browser": "1.0.2"
+    "@yireen/squoosh-browser": "1.0.4"
   },
   "devDependencies": {
     "webpack": "5.51.1",
