@@ -15,7 +15,7 @@ import { initEmscriptenModule, blobToArrayBuffer } from '../../../../features/wo
 
 let emscriptenModule: Promise<AVIFModule>;
 
-export default async function decode(blob: Blob): Promise<ImageData> {
+export default async function avifDecode(blob: Blob): Promise<ImageData> {
   if (!emscriptenModule) {
     const decoder = await import('../../../../codecs/avif/dec/avif_dec');
     emscriptenModule = initEmscriptenModule(decoder.default);

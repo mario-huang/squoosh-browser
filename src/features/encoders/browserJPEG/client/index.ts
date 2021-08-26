@@ -1,9 +1,7 @@
 import { canvasEncode } from '../../../../client/lazy-app/util/canvas';
-import WorkerBridge from '../../../../client/lazy-app/worker-bridge';
 import { mimeType, EncodeOptions } from '../shared/meta';
 
-export const encode = (
-  workerBridge: WorkerBridge,
+export const browserJPEGEncode = (
   imageData: ImageData,
   options: EncodeOptions,
 ) => canvasEncode(imageData, mimeType, options.quality);

@@ -14,8 +14,25 @@ import {
     defaultPreprocessorState,
     defaultProcessorState,
 } from '../feature-meta';
-import WorkerBridge from '../worker-bridge';
 import { drawableToImageData } from '../util/canvas';
+
+import avifDecode from '../../../features/decoders/avif/worker/avifDecode';
+import jxlDecode from '../../../features/decoders/jxl/worker/jxlDecode';
+import webpDecode from '../../../features/decoders/webp/worker/webpDecode';
+import wp2Decode from '../../../features/decoders/wp2/worker/wp2Decode';
+import avifEncode from '../../../features/encoders/avif/worker/avifEncode';
+import jxlEncode from '../../../features/encoders/jxl/worker/jxlEncode';
+import mozjpegEncode from '../../../features/encoders/mozJPEG/worker/mozjpegEncode';
+import oxipngEncode from '../../../features/encoders/oxiPNG/worker/oxipngEncode';
+import webpEncode from '../../../features/encoders/webP/worker/webpEncode';
+import wp2Encode from '../../../features/encoders/wp2/worker/wp2Encode';
+import rotate from '../../../features/preprocessors/rotate/worker/rotate';
+import quantize from '../../../features/processors/quantize/worker/quantize';
+import resize from '../../../features/processors/resize/worker/resize';
+import { browserGIFEncode } from '../../../features/encoders/browserGIF/client';
+import { browserJPEGEncode } from '../../../features/encoders/browserJPEG/client';
+import { browserPNGEncode } from 'features/encoders/browserPNG/client';
+import mozJPEGEncode from '../../../features/encoders/mozJPEG/worker/mozjpegEncode';
 
 export interface SourceImage {
     file: File;
@@ -33,25 +50,23 @@ interface Setting {
 // 解码
 async function decodeImage(
     blob: Blob,
-    workerBridge: WorkerBridge,
 ): Promise<ImageData> {
     const mimeType = await sniffMimeType(blob);
     const canDecode = await canDecodeImageType(mimeType);
     if (!canDecode) {
         // 用外置解码
-        if (mimeType === 'image/avif') {
-            return await workerBridge.avifDecode(blob);
+        switch (mimeType) {
+            case 'image/avif':
+                return await avifDecode(blob);
+            case 'image/webp':
+                return await webpDecode(blob);
+            case 'image/jxl':
+                return await jxlDecode(blob);
+            case 'image/webp2':
+                return await wp2Decode(blob);
+            default:
+                break;
         }
-        if (mimeType === 'image/webp') {
-            return await workerBridge.webpDecode(blob);
-        }
-        if (mimeType === 'image/jxl') {
-            return await workerBridge.jxlDecode(blob);
-        }
-        if (mimeType === 'image/webp2') {
-            return await workerBridge.wp2Decode(blob);
-        }
-
     }
     // Otherwise fall through and try built-in decoding for a laugh.
     // 用内置解码
@@ -62,12 +77,11 @@ async function decodeImage(
 async function preprocessImage(
     data: ImageData,
     preprocessorState: PreprocessorState,
-    workerBridge: WorkerBridge,
 ): Promise<ImageData> {
     let processedData = data;
 
     if (preprocessorState.rotate.rotate !== 0) {
-        processedData = await workerBridge.rotate(
+        processedData = await rotate(
             processedData,
             preprocessorState.rotate,
         );
@@ -80,12 +94,11 @@ async function preprocessImage(
 async function processImage(
     source: SourceImage,
     processorState: ProcessorState,
-    workerBridge: WorkerBridge,
 ): Promise<ImageData> {
     let result = source.preprocessed;
 
     if (processorState.quantize.enabled) {
-        result = await workerBridge.quantize(
+        result = await quantize(
             result,
             processorState.quantize,
         );
@@ -98,15 +111,40 @@ async function compressImage(
     image: ImageData,
     encodeData: EncoderState,
     sourceFilename: string,
-    workerBridge: WorkerBridge,
 ): Promise<File> {
     const encoder = encoderMap[encodeData.type];
-    const compressedData = await encoder.encode(
-        workerBridge,
-        image,
-        // The type of encodeData.options is enforced via the previous line
-        encodeData.options as any,
-    );
+    let compressedData: Blob | ArrayBuffer;
+    switch (encodeData.type) {
+        case "avif":
+            compressedData = await avifEncode(image, encodeData.options)
+            break;
+        case "browserGIF":
+            compressedData = await browserGIFEncode(image, encodeData.options)
+            break;
+        case "browserJPEG":
+            compressedData = await browserJPEGEncode(image, encodeData.options)
+            break;
+        case "browserPNG":
+            compressedData = await browserPNGEncode(image, encodeData.options)
+            break;
+        case "jxl":
+            compressedData = await jxlEncode(image, encodeData.options)
+            break;
+        case "mozJPEG":
+            compressedData = await mozJPEGEncode(image, encodeData.options)
+            break;
+        case "oxiPNG":
+            compressedData = await oxiPNGEncode(image, encodeData.options)
+            break;
+        case "mozJPEG":
+            compressedData = await mozJPEGEncode(image, encodeData.options)
+            break;
+        case "mozJPEG":
+            compressedData = await mozJPEGEncode(image, encodeData.options)
+            break;
+        default:
+            break;
+    }
 
     // This type ensures the image mimetype is consistent with our mimetype sniffer
     const type: ImageMimeTypes = encoder.meta.mimeType;
@@ -149,7 +187,6 @@ async function processSvg(
 
 export default class Compress {
 
-    private readonly workerBridge = new WorkerBridge();
     // 需要处理的文件
     private file: File;
     // 编码设置
@@ -177,22 +214,21 @@ export default class Compress {
             vectorImage = await processSvg(this.file);
             decoded = drawableToImageData(vectorImage);
         } else {
-            decoded = await decodeImage(this.file, this.workerBridge);
+            decoded = await decodeImage(this.file);
         }
 
         // 预处理
-        const preprocessed = await preprocessImage(decoded, this.setting.preprocessorState, this.workerBridge);
+        const preprocessed = await preprocessImage(decoded, this.setting.preprocessorState);
 
         // 加工
         const source: SourceImage = { "file": this.file, decoded, vectorImage, preprocessed };
-        const processed = await processImage(source, this.setting.processorState, this.workerBridge);
+        const processed = await processImage(source, this.setting.processorState);
 
         // 编码
         const file = await compressImage(
             processed,
             this.setting.encoderState,
             source.file.name,
-            this.workerBridge,
         );
 
         return file;

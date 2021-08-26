@@ -1,10 +1,8 @@
 import { EncodeOptions, defaultOptions, AVIFTune } from '../shared/meta';
-import type WorkerBridge from '../../../../client/lazy-app/worker-bridge';
 import { preventDefault, shallowEqual } from '../../../../client/lazy-app/util';
 
 
 export const encode = (
-  workerBridge: WorkerBridge,
   imageData: ImageData,
   options: EncodeOptions,
 ) => workerBridge.avifEncode(imageData, options);
