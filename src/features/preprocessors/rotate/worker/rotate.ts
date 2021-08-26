@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import wasmUrl from 'url:codecs/rotate/rotate.wasm';
+import wasmUrl from 'file:../../../../../codecs/rotate/rotate.wasm';
 import { Options } from '../shared/meta';
 
 export interface RotateModuleInstance {

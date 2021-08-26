@@ -22,6 +22,11 @@ declare module 'url:*' {
   export default value;
 }
 
+declare module 'file:*' {
+  const value: string;
+  export default value;
+}
+
 declare module 'img-url:*' {
   const value: string;
   export default value;

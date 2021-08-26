@@ -1,9 +1,4 @@
 import { EncodeOptions } from '../shared/meta';
-import {
-  inputFieldCheckedAsNumber,
-  inputFieldValueAsNumber,
-  preventDefault,
-} from '../../../../client/lazy-app/util';
 import encode from '../worker/webpEncode';
 
 export const webPEncode = (
