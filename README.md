@@ -6,6 +6,8 @@ An image compression tool run in browser while @squoosh/lib can not.
 
 Since @squoosh/lib can not run in browser, squoosh-browser is designed to solve it.
 
+It can process almost all image formats, such as "pdf", "gif", "png", "jpeg", "bmp", "tiff", "webp", "webp2", "avif", "jxl".
+
 # installation
 ```
 yarn add @yireen/squoosh-browser
