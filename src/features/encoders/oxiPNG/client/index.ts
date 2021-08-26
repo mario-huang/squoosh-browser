@@ -13,9 +13,9 @@ export async function encode(
   imageData: ImageData,
   options: EncodeOptions,
 ) {
-  const pngBlob = await abortable(signal, canvasEncode(imageData, 'image/png'));
-  const pngBuffer = await abortable(signal, blobToArrayBuffer(pngBlob));
-  return workerBridge.oxipngEncode(signal, pngBuffer, options);
+  const pngBlob = await canvasEncode(imageData, 'image/png');
+  const pngBuffer = await blobToArrayBuffer(pngBlob);
+  return workerBridge.oxipngEncode(pngBuffer, options);
 }
 
 type Props = {

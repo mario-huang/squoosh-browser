@@ -6,7 +6,7 @@ export const encode = (
   workerBridge: WorkerBridge,
   imageData: ImageData,
   options: EncodeOptions,
-) => workerBridge.jxlEncode(signal, imageData, options);
+) => workerBridge.jxlEncode(imageData, options);
 
 interface Props {
   options: EncodeOptions;

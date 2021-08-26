@@ -8,13 +8,13 @@ import {
 } from '../util';
 import {
     PreprocessorState,
-  ProcessorState,
-  EncoderState,
-  encoderMap,
-  defaultPreprocessorState,
-  defaultProcessorState,
-  EncoderType,
-  EncoderOptions,
+    ProcessorState,
+    EncoderState,
+    encoderMap,
+    defaultPreprocessorState,
+    defaultProcessorState,
+    EncoderType,
+    EncoderOptions,
 } from '../feature-meta';
 import { cleanMerge, cleanSet } from '../util/clean-modify';
 import WorkerBridge from '../worker-bridge';
@@ -28,19 +28,10 @@ export interface SourceImage {
 }
 
 interface Setting {
-    processorState: ProcessorState;
-    encoderState?: EncoderState;
-}
-
-interface MainJob {
-    file: File;
     preprocessorState: PreprocessorState;
-  }
-  
-  interface SideJob {
     processorState: ProcessorState;
-    encoderState?: EncoderState;
-  }
+    encoderState: EncoderState;
+}
 
 // 解码
 async function decodeImage(
@@ -68,6 +59,24 @@ async function decodeImage(
     // Otherwise fall through and try built-in decoding for a laugh.
     // 用内置解码
     return await builtinDecode(blob, mimeType);
+}
+
+// 预处理
+async function preprocessImage(
+    data: ImageData,
+    preprocessorState: PreprocessorState,
+    workerBridge: WorkerBridge,
+): Promise<ImageData> {
+    let processedData = data;
+
+    if (preprocessorState.rotate.rotate !== 0) {
+        processedData = await workerBridge.rotate(
+            processedData,
+            preprocessorState.rotate,
+        );
+    }
+
+    return processedData;
 }
 
 // 加工
@@ -140,51 +149,29 @@ async function processSvg(
     return blobToImg(new Blob([newSource], { type: 'image/svg+xml' }));
 }
 
-/**
- * If two processors are disabled, they're considered equivalent, otherwise
- * equivalence is based on ===
- */
-function processorStateEquivalent(a: ProcessorState, b: ProcessorState) {
-    // Quick exit
-    if (a === b) return true;
-
-    // All processors have the same keys
-    for (const key of Object.keys(a) as Array<keyof ProcessorState>) {
-        // If both processors are disabled, they're the same.
-        if (!a[key].enabled && !b[key].enabled) continue;
-        if (a !== b) return false;
-    }
-
-    return true;
-}
 
 export default class Compress {
 
     private readonly workerBridge = new WorkerBridge();
     // 需要处理的文件
     private file: File;
-    // ？？
-    private processed?: ImageData;
     // 编码设置
-    private setting: Setting = { "encoderState": undefined, "processorState": defaultProcessorState };
+    private setting: Setting = {
+        "encoderState": {
+            type: 'webP',
+            options: encoderMap.webP.meta.defaultOptions,
+        }, "processorState": defaultProcessorState, "preprocessorState": defaultPreprocessorState
+    };
 
     constructor(file: File, setting?: Setting) {
         this.file = file;
+        if (setting) {
+            this.setting = setting;
+        }
     }
 
     // 处理
-    async process(): Promise<void> {
-        return await this.updateImage();
-    }
-
-    /**
-     * Perform image processing.
-     *
-     * This function is a monster, but I didn't want to break it up, because it
-     * never gets partially called. Instead, it looks at the current state, and
-     * decides which steps can be skipped, and which can be cached.
-     */
-    private async updateImage() {
+    async process(): Promise<File> {
         let decoded: ImageData;
         let vectorImage: HTMLImageElement | undefined;
 
@@ -197,27 +184,20 @@ export default class Compress {
         }
 
         // 预处理
-        const preprocessed = await preprocessImage(
-            decoded,
-            mainJobState.preprocessorState,
-            // Either worker is good enough here.
-            this.workerBridges[0],
-          );
+        const preprocessed = await preprocessImage(decoded, this.setting.preprocessorState, this.workerBridge);
 
         // 加工
-        // If there's no encoder state, this is "original image", which also
-        // doesn't allow processing.
-        const file = this.file;
-        const source: SourceImage = {file,decoded,vectorImage};
-        processed = await processImage();
+        const source: SourceImage = { "file": this.file, decoded, vectorImage, preprocessed };
+        const processed = await processImage(source, this.setting.processorState, this.workerBridge);
 
-
-        file = await compressImage(
+        // 编码
+        const file = await compressImage(
             processed,
-            jobState.encoderState,
+            this.setting.encoderState,
             source.file.name,
-            workerBridge,
+            this.workerBridge,
         );
-        data = await decodeImage(signal, file, workerBridge);
+
+        return file;
     }
 }
