@@ -13,10 +13,7 @@ import {
     encoderMap,
     defaultPreprocessorState,
     defaultProcessorState,
-    EncoderType,
-    EncoderOptions,
 } from '../feature-meta';
-import { cleanMerge, cleanSet } from '../util/clean-modify';
 import WorkerBridge from '../worker-bridge';
 import { drawableToImageData } from '../util/canvas';
 
