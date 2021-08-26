@@ -20,19 +20,18 @@ import avifDecode from '../../../features/decoders/avif/worker/avifDecode';
 import jxlDecode from '../../../features/decoders/jxl/worker/jxlDecode';
 import webpDecode from '../../../features/decoders/webp/worker/webpDecode';
 import wp2Decode from '../../../features/decoders/wp2/worker/wp2Decode';
-import avifEncode from '../../../features/encoders/avif/worker/avifEncode';
-import jxlEncode from '../../../features/encoders/jxl/worker/jxlEncode';
-import mozjpegEncode from '../../../features/encoders/mozJPEG/worker/mozjpegEncode';
-import oxipngEncode from '../../../features/encoders/oxiPNG/worker/oxipngEncode';
-import webpEncode from '../../../features/encoders/webP/worker/webpEncode';
-import wp2Encode from '../../../features/encoders/wp2/worker/wp2Encode';
-import rotate from '../../../features/preprocessors/rotate/worker/rotate';
-import quantize from '../../../features/processors/quantize/worker/quantize';
-import resize from '../../../features/processors/resize/worker/resize';
 import { browserGIFEncode } from '../../../features/encoders/browserGIF/client';
+import { avifEncode } from '../../../features/encoders/avif/client';
 import { browserJPEGEncode } from '../../../features/encoders/browserJPEG/client';
-import { browserPNGEncode } from 'features/encoders/browserPNG/client';
-import mozJPEGEncode from '../../../features/encoders/mozJPEG/worker/mozjpegEncode';
+import { browserPNGEncode } from '../../../features/encoders/browserPNG/client';
+import { jxlEncode } from '../../../features/encoders/jxl/client';
+import { mozJPEGEncode } from '../../../features/encoders/mozJPEG/client';
+import { oxiPNGEncode } from '../../../features/encoders/oxiPNG/client';
+import { webPEncode } from '../../../features/encoders/webP/client';
+import { wp2Encode } from '../../../features/encoders/wp2/client';
+import rotate from '../../../features/preprocessors/rotate/worker/rotate';
+import { resizeImage } from '../../../features/processors/resize/client';
+import quantize from '../../../features/processors/quantize/worker/quantize';
 
 export interface SourceImage {
     file: File;
@@ -96,7 +95,9 @@ async function processImage(
     processorState: ProcessorState,
 ): Promise<ImageData> {
     let result = source.preprocessed;
-
+    if (processorState.resize.enabled) {
+        result = await resizeImage(source, processorState.resize);
+      }
     if (processorState.quantize.enabled) {
         result = await quantize(
             result,
@@ -136,13 +137,14 @@ async function compressImage(
         case "oxiPNG":
             compressedData = await oxiPNGEncode(image, encodeData.options)
             break;
-        case "mozJPEG":
-            compressedData = await mozJPEGEncode(image, encodeData.options)
+        case "webP":
+            compressedData = await webPEncode(image, encodeData.options)
             break;
-        case "mozJPEG":
-            compressedData = await mozJPEGEncode(image, encodeData.options)
+        case "wp2":
+            compressedData = await wp2Encode(image, encodeData.options)
             break;
         default:
+            compressedData = new Blob();
             break;
     }
 

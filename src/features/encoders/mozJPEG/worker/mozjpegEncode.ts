@@ -16,7 +16,7 @@ import { initEmscriptenModule } from '../../../../features/worker-utils';
 
 let emscriptenModule: Promise<MozJPEGModule>;
 
-export default async function mozJPEGEncode(
+export default async function encode(
   data: ImageData,
   options: EncodeOptions,
 ): Promise<ArrayBuffer> {

@@ -1,12 +1,11 @@
 import { EncodeOptions } from '../shared/meta';
 import { preventDefault, shallowEqual } from '../../../../client/lazy-app/util';
-import WorkerBridge from '../../../../client/lazy-app/worker-bridge';
+import encode from '../worker/jxlEncode';
 
-export const encode = (
-  workerBridge: WorkerBridge,
+export const jxlEncode = (
   imageData: ImageData,
   options: EncodeOptions,
-) => workerBridge.jxlEncode(imageData, options);
+) => encode(imageData, options);
 
 interface Props {
   options: EncodeOptions;

@@ -1,17 +1,11 @@
 import { EncodeOptions, MozJpegColorSpace } from '../shared/meta';
-import type WorkerBridge from '../../../../client/lazy-app/worker-bridge';
-import {
-  inputFieldChecked,
-  inputFieldValueAsNumber,
-  preventDefault,
-} from '../../../../client/lazy-app/util';
+import encode from '../worker/mozjpegEncode';
 
-export function encode(
-  workerBridge: WorkerBridge,
+export function mozJPEGEncode(
   imageData: ImageData,
   options: EncodeOptions,
 ) {
-  return workerBridge.mozjpegEncode(imageData, options);
+  return encode(imageData, options);
 }
 
 interface Props {

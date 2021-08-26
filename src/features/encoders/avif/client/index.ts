@@ -1,11 +1,11 @@
 import { EncodeOptions, defaultOptions, AVIFTune } from '../shared/meta';
-import { preventDefault, shallowEqual } from '../../../../client/lazy-app/util';
+import encode from '../worker/avifEncode';
 
 
-export const encode = (
+export const avifEncode = (
   imageData: ImageData,
   options: EncodeOptions,
-) => workerBridge.avifEncode(imageData, options);
+) => encode(imageData, options);
 
 interface Props {
   options: EncodeOptions;

@@ -1,16 +1,15 @@
 import { EncodeOptions } from '../shared/meta';
-import type WorkerBridge from '../../../../client/lazy-app/worker-bridge';
 import {
   inputFieldCheckedAsNumber,
   inputFieldValueAsNumber,
   preventDefault,
 } from '../../../../client/lazy-app/util';
+import encode from '../worker/webpEncode';
 
-export const encode = (
-  workerBridge: WorkerBridge,
+export const webPEncode = (
   imageData: ImageData,
   options: EncodeOptions,
-) => workerBridge.webpEncode(imageData, options);
+) => encode(imageData, options);
 
 const enum WebPImageHint {
   WEBP_HINT_DEFAULT, // default preset.
