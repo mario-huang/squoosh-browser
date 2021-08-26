@@ -6,7 +6,7 @@
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
     "target": "ESNext",
-    "sourceMap": true,
+    "sourceMap": false,
     "outDir": "./dist",
     "incremental": true
   },

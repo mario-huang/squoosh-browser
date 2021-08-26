@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { JXLModule } from '../../../../codecs/jxl/enc/jxl_enc';
+import type { JXLModule } from '../../../../../codecs/jxl/enc/jxl_enc';
 import type { EncodeOptions } from '../shared/meta';
 
 import { initEmscriptenModule } from '../../../../features/worker-utils';
@@ -21,13 +21,13 @@ let emscriptenModule: Promise<JXLModule>;
 async function init() {
   if (await threads()) {
     if (await simd()) {
-      const jxlEncoder = await import('../../../../codecs/jxl/enc/jxl_enc_mt_simd');
+      const jxlEncoder = await import('../../../../../codecs/jxl/enc/jxl_enc_mt_simd');
       return initEmscriptenModule(jxlEncoder.default);
     }
-    const jxlEncoder = await import('../../../../codecs/jxl/enc/jxl_enc_mt');
+    const jxlEncoder = await import('../../../../../codecs/jxl/enc/jxl_enc_mt');
     return initEmscriptenModule(jxlEncoder.default);
   }
-  const jxlEncoder = await import('../../../../codecs/jxl/enc/jxl_enc');
+  const jxlEncoder = await import('../../../../../codecs/jxl/enc/jxl_enc');
   return initEmscriptenModule(jxlEncoder.default);
 }
 

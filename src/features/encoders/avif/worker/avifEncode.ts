@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { AVIFModule } from '../../../../codecs/avif/enc/avif_enc';
+import type { AVIFModule } from '../../../../../codecs/avif/enc/avif_enc';
 import type { EncodeOptions } from '../shared/meta';
 import { initEmscriptenModule } from '../../../../features/worker-utils';
 import { threads } from 'wasm-feature-detect';
@@ -19,10 +19,10 @@ let emscriptenModule: Promise<AVIFModule>;
 
 async function init() {
   if (await threads()) {
-    const avifEncoder = await import('../../../../codecs/avif/enc/avif_enc_mt');
+    const avifEncoder = await import('../../../../../codecs/avif/enc/avif_enc_mt');
     return initEmscriptenModule<AVIFModule>(avifEncoder.default);
   }
-  const avifEncoder = await import('../../../../codecs/avif/enc/avif_enc.js');
+  const avifEncoder = await import('../../../../../codecs/avif/enc/avif_enc.js');
   return initEmscriptenModule(avifEncoder.default);
 }
 
