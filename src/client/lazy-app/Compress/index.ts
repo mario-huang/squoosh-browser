@@ -29,7 +29,6 @@ import { mozJPEGEncode } from '../../../features/encoders/mozJPEG/client';
 import { oxiPNGEncode } from '../../../features/encoders/oxiPNG/client';
 import { webPEncode } from '../../../features/encoders/webP/client';
 import { wp2Encode } from '../../../features/encoders/wp2/client';
-import rotate from '../../../features/preprocessors/rotate/worker/rotate';
 import { resizeImage } from '../../../features/processors/resize/client';
 import quantize from '../../../features/processors/quantize/worker/quantize';
 
@@ -80,10 +79,7 @@ async function preprocessImage(
     let processedData = data;
 
     if (preprocessorState.rotate.rotate !== 0) {
-        processedData = await rotate(
-            processedData,
-            preprocessorState.rotate,
-        );
+        
     }
 
     return processedData;

@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "start": "webpack serve --open"
   },
   "dependencies": {
-    "lodash": "4.17.21",
-    "@yireen/squoosh-browser": "0.0.8"
+    "@yireen/squoosh-browser": "1.0.0"
   },
   "devDependencies": {
     "webpack": "5.51.1",
-    "webpack-cli": "4.8.0"
+    "webpack-cli": "4.8.0",
+    "webpack-dev-server": "4.0.0"
   }
 }
