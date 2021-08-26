@@ -6,8 +6,8 @@
     "build": "webpack"
   },
   "dependencies": {
-    "lodash": "^4.17.21",
-    "@yireen/squoosh-browser": "0.0.4"
+    "lodash": "4.17.21",
+    "@yireen/squoosh-browser": "0.0.8"
   },
   "devDependencies": {
     "webpack": "5.51.1",
