@@ -1,11 +1,16 @@
 {
   "name": "@yireen/squoosh-browser",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "An image compression tool run in browser while @squoosh/lib can not.",
   "main": "dist/client/lazy-app/Compress/index.js",
-  "repository": "git@github.com:myeveryheart/squoosh-browser.git",
   "author": "Mario <myeveryheart@qq.com>",
   "license": "MIT",
+  "public": true,
+  "homepage": "https://github.com/myeveryheart/squoosh-browser",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/myeveryheart/squoosh-browser.git"
+  },
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "rm -rf dist & yarn run build"
