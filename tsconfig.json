@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "downlevelIteration": true,
-    "module": "CommonJS",
     "declaration": true,
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ESNext",
     "sourceMap": false,
     "outDir": "./dist",
-    "incremental": true
+    "incremental": true,
+    "target":"ES6",
+    "moduleResolution": "node"
   },
 }
