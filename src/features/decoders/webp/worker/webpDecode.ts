@@ -15,10 +15,11 @@ import { initEmscriptenModule, blobToArrayBuffer } from '../../../../features/wo
 
 let emscriptenModule: Promise<WebPModule>;
 
+import decoder from '../../../../../codecs/webp/dec/webp_dec'
+
 export default async function decode(blob: Blob): Promise<ImageData> {
   if (!emscriptenModule) {
-    const decoder = await import('../../../../../codecs/webp/dec/webp_dec');
-    emscriptenModule = initEmscriptenModule(decoder.default);
+    emscriptenModule = initEmscriptenModule(decoder);
   }
 
   const [module, data] = await Promise.all([

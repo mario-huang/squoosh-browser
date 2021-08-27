@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "downlevelIteration": true,
+    // "downlevelIteration": true,
     "declaration": true,
     "removeComments": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": false,
+    // "allowSyntheticDefaultImports": true,
+    // "sourceMap": false,
     "outDir": "./dist",
-    "incremental": true,
-    "target":"ES6",
-    "moduleResolution": "node"
+    // "incremental": true,
+    "target":"ESNext",
+    // "moduleResolution": "node",
+    "lib": ["esnext", "dom", "dom.iterable", "webworker"]
   },
 }

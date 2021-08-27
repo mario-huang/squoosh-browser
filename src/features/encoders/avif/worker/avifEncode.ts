@@ -15,15 +15,16 @@ import type { EncodeOptions } from '../shared/meta';
 import { initEmscriptenModule } from '../../../../features/worker-utils';
 import { threads } from 'wasm-feature-detect';
 
+import avifEncoderMt from '../../../../../codecs/avif/enc/avif_enc_mt';
+import avifEncoder from '../../../../../codecs/avif/enc/avif_enc';
+
 let emscriptenModule: Promise<AVIFModule>;
 
 async function init() {
   if (await threads()) {
-    const avifEncoder = await import('../../../../../codecs/avif/enc/avif_enc_mt');
-    return initEmscriptenModule<AVIFModule>(avifEncoder.default);
+    return initEmscriptenModule<AVIFModule>(avifEncoderMt);
   }
-  const avifEncoder = await import('../../../../../codecs/avif/enc/avif_enc.js');
-  return initEmscriptenModule(avifEncoder.default);
+  return initEmscriptenModule(avifEncoder);
 }
 
 export default async function encode(

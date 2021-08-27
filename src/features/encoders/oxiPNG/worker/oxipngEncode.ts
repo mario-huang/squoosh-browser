@@ -12,22 +12,18 @@
  */
 import { EncodeOptions } from '../shared/meta';
 import { threads } from 'wasm-feature-detect';
+import initMt, { initThreadPool as initThreadPoolMt, optimise as optimiseMt } from '../../../../../codecs/oxipng/pkg-parallel/squoosh_oxipng';
+import initSt, { optimise as optimiseSt } from '../../../../../codecs/oxipng/pkg/squoosh_oxipng';
 
 async function initMT() {
-  const { default: init, initThreadPool, optimise } = await import(
-    '../../../../../codecs/oxipng/pkg-parallel/squoosh_oxipng'
-  );
-  await init();
-  await initThreadPool(navigator.hardwareConcurrency);
-  return optimise;
+  await initMt();
+  await initThreadPoolMt(navigator.hardwareConcurrency);
+  return optimiseMt;
 }
 
 async function initST() {
-  const { default: init, optimise } = await import(
-    '../../../../../codecs/oxipng/pkg/squoosh_oxipng'
-  );
-  await init();
-  return optimise;
+  await initSt();
+  return optimiseSt;
 }
 
 let wasmReady: ReturnType<typeof initMT | typeof initST>;

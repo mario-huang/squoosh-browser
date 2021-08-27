@@ -13,12 +13,13 @@
 import type { AVIFModule } from '../../../../../codecs/avif/dec/avif_dec';
 import { initEmscriptenModule, blobToArrayBuffer } from '../../../../features/worker-utils';
 
+import decoder from '../../../../../codecs/avif/dec/avif_dec';
+
 let emscriptenModule: Promise<AVIFModule>;
 
 export default async function avifDecode(blob: Blob): Promise<ImageData> {
   if (!emscriptenModule) {
-    const decoder = await import('../../../../../codecs/avif/dec/avif_dec');
-    emscriptenModule = initEmscriptenModule(decoder.default);
+    emscriptenModule = initEmscriptenModule(decoder);
   }
 
   const [module, data] = await Promise.all([

@@ -16,19 +16,20 @@ import type { EncodeOptions } from '../shared/meta';
 import { initEmscriptenModule } from '../../../../features/worker-utils';
 import { threads, simd } from 'wasm-feature-detect';
 
+import jxlEncoderSimd from '../../../../../codecs/jxl/enc/jxl_enc_mt_simd';
+import jxlEncoderMt from '../../../../../codecs/jxl/enc/jxl_enc_mt';
+import jxlEncoder from '../../../../../codecs/jxl/enc/jxl_enc';
+
 let emscriptenModule: Promise<JXLModule>;
 
 async function init() {
   if (await threads()) {
     if (await simd()) {
-      const jxlEncoder = await import('../../../../../codecs/jxl/enc/jxl_enc_mt_simd');
-      return initEmscriptenModule(jxlEncoder.default);
+      return initEmscriptenModule(jxlEncoderSimd);
     }
-    const jxlEncoder = await import('../../../../../codecs/jxl/enc/jxl_enc_mt');
-    return initEmscriptenModule(jxlEncoder.default);
+    return initEmscriptenModule(jxlEncoderMt);
   }
-  const jxlEncoder = await import('../../../../../codecs/jxl/enc/jxl_enc');
-  return initEmscriptenModule(jxlEncoder.default);
+  return initEmscriptenModule(jxlEncoder);
 }
 
 export default async function encode(
