@@ -16,19 +16,20 @@ import type { EncodeOptions } from '../shared/meta';
 import { initEmscriptenModule } from '../../../../features/worker-utils';
 import { threads, simd } from 'wasm-feature-detect';
 
+import wp2EncoderSimd from '../../../../../codecs/wp2/enc/wp2_enc_mt_simd';
+import wp2EncoderMt from '../../../../../codecs/wp2/enc/wp2_enc_mt';
+import wp2Encoder from '../../../../../codecs/wp2/enc/wp2_enc';
+
 let emscriptenModule: Promise<WP2Module>;
 
 async function init() {
   if (await threads()) {
     if (await simd()) {
-      const wp2Encoder = await import('../../../../../codecs/wp2/enc/wp2_enc_mt_simd');
-      return initEmscriptenModule(wp2Encoder.default);
+      return initEmscriptenModule(wp2EncoderSimd);
     }
-    const wp2Encoder = await import('../../../../../codecs/wp2/enc/wp2_enc_mt');
-    return initEmscriptenModule(wp2Encoder.default);
+    return initEmscriptenModule(wp2EncoderMt);
   }
-  const wp2Encoder = await import('../../../../../codecs/wp2/enc/wp2_enc');
-  return initEmscriptenModule(wp2Encoder.default);
+  return initEmscriptenModule(wp2Encoder);
 }
 
 export default async function encode(
