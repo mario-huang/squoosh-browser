@@ -10,15 +10,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { WP2Module } from '../../../../../codecs/wp2/enc/wp2_enc';
-import type { EncodeOptions } from '../shared/meta';
+import type { WP2Module } from '../../../../../codecs/wp2/enc/wp2_enc.js';
+import type { EncodeOptions } from '../shared/meta.js';
 
 import { initEmscriptenModule } from '../../../../features/worker-utils';
 import { threads, simd } from 'wasm-feature-detect';
 
-import wp2EncoderSimd from '../../../../../codecs/wp2/enc/wp2_enc_mt_simd';
-import wp2EncoderMt from '../../../../../codecs/wp2/enc/wp2_enc_mt';
-import wp2Encoder from '../../../../../codecs/wp2/enc/wp2_enc';
+import wp2EncoderSimd from '../../../../../codecs/wp2/enc/wp2_enc_mt_simd.js';
+import wp2EncoderMt from '../../../../../codecs/wp2/enc/wp2_enc_mt.js';
+import wp2Encoder from '../../../../../codecs/wp2/enc/wp2_enc.js';
 
 let emscriptenModule: Promise<WP2Module>;
 

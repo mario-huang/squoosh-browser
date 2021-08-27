@@ -10,10 +10,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { AVIFModule } from '../../../../../codecs/avif/dec/avif_dec';
+import type { AVIFModule } from '../../../../../codecs/avif/dec/avif_dec.js';
 import { initEmscriptenModule, blobToArrayBuffer } from '../../../../features/worker-utils';
 
-import decoder from '../../../../../codecs/avif/dec/avif_dec';
+import decoder from '../../../../../codecs/avif/dec/avif_dec.js';
 
 let emscriptenModule: Promise<AVIFModule>;
 

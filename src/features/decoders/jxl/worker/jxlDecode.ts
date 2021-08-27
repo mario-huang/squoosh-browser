@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import jxlDecoder, { JXLModule } from '../../../../../codecs/jxl/dec/jxl_dec';
+import jxlDecoder, { JXLModule } from '../../../../../codecs/jxl/dec/jxl_dec.js';
 import { initEmscriptenModule, blobToArrayBuffer } from '../../../../features/worker-utils';
 
 let emscriptenModule: Promise<JXLModule>;

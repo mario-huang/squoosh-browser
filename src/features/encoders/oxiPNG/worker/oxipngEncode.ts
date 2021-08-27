@@ -12,8 +12,8 @@
  */
 import { EncodeOptions } from '../shared/meta';
 import { threads } from 'wasm-feature-detect';
-import initMt, { initThreadPool as initThreadPoolMt, optimise as optimiseMt } from '../../../../../codecs/oxipng/pkg-parallel/squoosh_oxipng';
-import initSt, { optimise as optimiseSt } from '../../../../../codecs/oxipng/pkg/squoosh_oxipng';
+import initMt, { initThreadPool as initThreadPoolMt, optimise as optimiseMt } from '../../../../../codecs/oxipng/pkg-parallel/squoosh_oxipng.js';
+import initSt, { optimise as optimiseSt } from '../../../../../codecs/oxipng/pkg/squoosh_oxipng.js';
 
 async function initMT() {
   await initMt();

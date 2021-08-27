@@ -10,12 +10,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { WebPModule } from '../../../../../codecs/webp/dec/webp_dec';
+import type { WebPModule } from '../../../../../codecs/webp/dec/webp_dec.js';
 import { initEmscriptenModule, blobToArrayBuffer } from '../../../../features/worker-utils';
 
 let emscriptenModule: Promise<WebPModule>;
 
-import decoder from '../../../../../codecs/webp/dec/webp_dec'
+import decoder from '../../../../../codecs/webp/dec/webp_dec.js'
 
 export default async function decode(blob: Blob): Promise<ImageData> {
   if (!emscriptenModule) {

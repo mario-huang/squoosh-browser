@@ -10,15 +10,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { JXLModule } from '../../../../../codecs/jxl/enc/jxl_enc';
+import type { JXLModule } from '../../../../../codecs/jxl/enc/jxl_enc.js';
 import type { EncodeOptions } from '../shared/meta';
 
 import { initEmscriptenModule } from '../../../../features/worker-utils';
 import { threads, simd } from 'wasm-feature-detect';
 
-import jxlEncoderSimd from '../../../../../codecs/jxl/enc/jxl_enc_mt_simd';
-import jxlEncoderMt from '../../../../../codecs/jxl/enc/jxl_enc_mt';
-import jxlEncoder from '../../../../../codecs/jxl/enc/jxl_enc';
+import jxlEncoderSimd from '../../../../../codecs/jxl/enc/jxl_enc_mt_simd.js';
+import jxlEncoderMt from '../../../../../codecs/jxl/enc/jxl_enc_mt.js';
+import jxlEncoder from '../../../../../codecs/jxl/enc/jxl_enc.js';
 
 let emscriptenModule: Promise<JXLModule>;
 

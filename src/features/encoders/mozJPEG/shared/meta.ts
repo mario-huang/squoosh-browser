@@ -13,7 +13,7 @@
 import {
   EncodeOptions,
   MozJpegColorSpace,
-} from '../../../../../codecs/mozjpeg/enc/mozjpeg_enc';
+} from '../../../../../codecs/mozjpeg/enc/mozjpeg_enc.js';
 export { EncodeOptions, MozJpegColorSpace };
 
 export const label = 'MozJPEG';

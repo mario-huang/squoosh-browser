@@ -1,7 +1,7 @@
 import type { WorkerResizeOptions } from '../shared/meta';
 import { getContainOffsets } from '../shared/util';
-import initResizeWasm, { resize as wasmResize } from '../../../../../codecs/resize/pkg/squoosh_resize';
-import initHqxWasm, { resize as wasmHqx } from '../../../../../codecs/hqx/pkg/squooshhqx';
+import initResizeWasm, { resize as wasmResize } from '../../../../../codecs/resize/pkg/squoosh_resize.js';
+import initHqxWasm, { resize as wasmHqx } from '../../../../../codecs/hqx/pkg/squooshhqx.js';
 
 interface HqxResizeOptions extends WorkerResizeOptions {
   method: 'hqx';

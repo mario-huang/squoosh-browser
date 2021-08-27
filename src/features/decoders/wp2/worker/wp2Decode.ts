@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import wp2Decoder, { WP2Module } from '../../../../../codecs/wp2/dec/wp2_dec';
+import wp2Decoder, { WP2Module } from '../../../../../codecs/wp2/dec/wp2_dec.js';
 import { initEmscriptenModule, blobToArrayBuffer } from '../../../../features/worker-utils';
 
 let emscriptenModule: Promise<WP2Module>;

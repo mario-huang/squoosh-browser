@@ -8,7 +8,7 @@
     "outDir": "./dist",
     // "incremental": true,
     "target":"ESNext",
-    // "moduleResolution": "node",
-    "lib": ["esnext", "dom", "dom.iterable", "webworker"]
+    "module":"ESNext",
+    "moduleResolution": "node",
   },
 }

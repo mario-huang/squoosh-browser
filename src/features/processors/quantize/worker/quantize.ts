@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import imagequant, { QuantizerModule } from '../../../../../codecs/imagequant/imagequant';
+import imagequant, { QuantizerModule } from '../../../../../codecs/imagequant/imagequant.js';
 import { initEmscriptenModule } from '../../../../features/worker-utils';
 import { Options } from '../shared/meta';
 

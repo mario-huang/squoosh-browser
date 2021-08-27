@@ -10,14 +10,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { WebPModule } from '../../../../../codecs/webp/enc/webp_enc';
+import type { WebPModule } from '../../../../../codecs/webp/enc/webp_enc.js';
 import type { EncodeOptions } from '../shared/meta';
 
 import { initEmscriptenModule } from '../../../../features/worker-utils';
 import { simd } from 'wasm-feature-detect';
 
-import webpEncoderSimd from '../../../../../codecs/webp/enc/webp_enc_simd';
-import webpEncoder from '../../../../../codecs/webp/enc/webp_enc';
+import webpEncoderSimd from '../../../../../codecs/webp/enc/webp_enc_simd.js';
+import webpEncoder from '../../../../../codecs/webp/enc/webp_enc.js';
 
 let emscriptenModule: Promise<WebPModule>;
 
