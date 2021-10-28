@@ -1,6 +1,6 @@
 {
   "name": "@yireen/squoosh-browser",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "An image compression tool run in browser while @squoosh/lib can not.",
   "main": "dist/client/lazy-app/Compress/index.js",
   "author": "Mario <myeveryheart@qq.com>",
@@ -53,6 +53,6 @@
     "vue"
   ],
   "engines": {
-    "node": "^14.0.0"
+    "node": ">=14.0.0"
   }
 }
