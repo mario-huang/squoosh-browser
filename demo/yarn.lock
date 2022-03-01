@@ -219,10 +219,10 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@yireen/squoosh-browser@1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@yireen/squoosh-browser/-/squoosh-browser-1.0.5.tgz#61a9838c3c7027664a75ad6efad6695e522ee2f2"
-  integrity sha512-y03nbjlPTjjNcrbiumickUFe+jtkQFlxMKo/PRDyc0dRQ7nUsYD8ACpN3Ogd+/0hfAYyglzlZMucOZNpJPL9Ag==
+"@yireen/squoosh-browser@1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@yireen/squoosh-browser/-/squoosh-browser-1.0.6.tgz#6546e9683c114c6fdf7afbd96029e62c73cd5d8f"
+  integrity sha512-7mL6gJhU3bSrw7T71aBCMQgZ6DKD8O8p/KrFWuA0M3imIf00lar+bkpX8KtnaOq39IksFbITnCyZQ6UCYrEn5w==
   dependencies:
     wasm-feature-detect "1.2.11"
 
@@ -2095,7 +2095,7 @@ wbuf@^1.1.0, wbuf@^1.7.3:
   dependencies:
     minimalistic-assert "^1.0.0"
 
-webpack-cli@^4.8.0:
+webpack-cli@4.8.0:
   version "4.8.0"
   resolved "https://registry.yarnpkg.com/webpack-cli/-/webpack-cli-4.8.0.tgz#5fc3c8b9401d3c8a43e2afceacfa8261962338d1"
   integrity sha512-+iBSWsX16uVna5aAYN6/wjhJy1q/GKk4KjKvfg90/6hykCTSgozbfz5iRgDTSJt/LgSbYxdBX3KBHeobIs+ZEw==

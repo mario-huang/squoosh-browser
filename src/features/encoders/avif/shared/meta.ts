@@ -13,7 +13,11 @@
 import { EncodeOptions, AVIFTune } from '../../../../../codecs/avif/enc/avif_enc.js';
 
 export { EncodeOptions, AVIFTune };
-
+const enum AVIFTune {
+  auto,
+  psnr,
+  ssim,
+}
 export const label = 'AVIF';
 export const mimeType = 'image/avif';
 export const extension = 'avif';
