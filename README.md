@@ -21,7 +21,7 @@ yarn add file-loader --dev
 # config
 For Vite
 ```js
-// webpack.config.js
+// vite.config.js
 const config = {
   optimizeDeps: {
     exclude: ['@yireen/squoosh-browser'],
@@ -44,7 +44,7 @@ module: {
 
 For webpack4
 ```js
-// vite.config.js
+// webpack.config.js
 module: {
   rules: [
     {
