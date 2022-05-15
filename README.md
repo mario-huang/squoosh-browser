@@ -44,7 +44,7 @@ module: {
 
 For webpack4
 ```js
-// webpack.config.js
+// vite.config.js
 module: {
   rules: [
     {
