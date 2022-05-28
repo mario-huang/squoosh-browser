@@ -19,6 +19,16 @@ yarn add file-loader --dev
 ```
 
 # config
+For Vite
+```js
+// vite.config.js
+const config = {
+  optimizeDeps: {
+    exclude: ['@yireen/squoosh-browser'],
+  }
+}
+```
+
 For webpack5
 ```js
 // webpack.config.js
